@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+        cache: true
+
+    - name: Go Tests
+      run: go test ./...
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: './web/app/package-lock.json'
+
+    - name: Install Frontend Deps
+      run: |
+        cd web/app && npm install
+        cd ../testdash && npm install
+
+    - name: Create kind cluster
+      uses: helm/kind-action@v1.10.0
+      with:
+        version: v0.27.0
+        kubectl_version: v1.32.2
+        node_image: kindest/node:v1.32.2
+
+    - name: Playwright Tests
+      run: |
+        # Placeholder for Playwright installation and execution
+        echo "Running Playwright tests..."

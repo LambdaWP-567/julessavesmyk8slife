@@ -1,0 +1,10 @@
+FROM mcr.microsoft.com/devcontainers/go:1.24-bookworm AS builder
+WORKDIR /app
+COPY go.mod ./
+COPY . .
+RUN go build -o testorch ./cmd/testorch/main.go
+
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=builder /app/testorch .
+CMD ["./testorch"]
