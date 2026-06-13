@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -16,6 +19,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.24'
+        cache: true
 
     - name: Go Tests
       run: go test ./...
@@ -24,6 +28,8 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: './web/app/package-lock.json'
 
     - name: Install Frontend Deps
       run: |
@@ -32,6 +38,10 @@ jobs:
 
     - name: Create kind cluster
       uses: helm/kind-action@v1.10.0
+      with:
+        version: v0.27.0
+        kubectl_version: v1.32.2
+        node_image: kindest/node:v1.32.2
 
     - name: Playwright Tests
       run: |
